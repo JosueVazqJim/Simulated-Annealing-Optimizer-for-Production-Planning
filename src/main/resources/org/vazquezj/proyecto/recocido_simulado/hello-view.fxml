@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/23.0.1"
+      fx:controller="org.vazquezj.proyecto.recocido_simulado.HelloController"
+      alignment="TOP_CENTER" spacing="20" prefWidth="1000" prefHeight="850"
+      style="-fx-background-color: #f0f4f8;">
+
+  <padding>
+    <Insets top="30" bottom="30" left="40" right="40"/>
+  </padding>
+
+  <Label text="Simulación por Recocido Simulado – Planificación"
+         style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+  <HBox spacing="20" alignment="CENTER">
+    <VBox spacing="10">
+      <Label text="Tareas (una por línea: Ck,Fk,Dk)" style="-fx-font-size: 14px;"/>
+      <TextArea fx:id="txtTareas"
+                prefRowCount="10" prefWidth="300"
+                promptText="Ejemplo:\n0,10,5\n5,15,6"
+                style="-fx-font-family: monospace; -fx-font-size: 14px;"/>
+    </VBox>
+
+    <VBox spacing="10">
+      <Label text="Solución Inicial E(π) (lista separada por comas)" style="-fx-font-size: 14px;"/>
+      <TextField fx:id="txtSolucionInicial"
+                 promptText="Ej. 0,20,40,60,80,100"
+                 style="-fx-font-size: 14px;" prefWidth="300"/>
+    </VBox>
+  </HBox>
+
+  <GridPane hgap="20" vgap="15" alignment="CENTER">
+    <columnConstraints>
+      <ColumnConstraints halignment="RIGHT"/>
+      <ColumnConstraints halignment="LEFT" percentWidth="80"/>
+    </columnConstraints>
+
+    <Label text="Temperatura Inicial:" style="-fx-font-size: 14px;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+    <TextField fx:id="txtInitialTemp" promptText="Ej. 1.0" style="-fx-font-size: 14px;" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+    <Label text="Temperatura Final:" style="-fx-font-size: 14px;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <TextField fx:id="txtFinalTemp" promptText="Ej. 0.00001" style="-fx-font-size: 14px;" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+    <Label text="Tasa de Enfriamiento (ε):" style="-fx-font-size: 14px;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <TextField fx:id="txtCoolingRate" promptText="Ej. 0.975" style="-fx-font-size: 14px;" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+    <Label text="Iteraciones por Temperatura:" style="-fx-font-size: 14px;" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <TextField fx:id="txtIterTemp" promptText="Ej. 5" style="-fx-font-size: 14px;" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+  </GridPane>
+
+  <Button text="Ejecutar Simulación"
+          fx:id="btnRun"
+          onAction="#onRunSimulation"
+          style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 20 10 20;"/>
+
+  <Label text="Mejor Solución Encontrada:"
+         style="-fx-font-size: 16px; -fx-text-fill: #2c3e50; -fx-font-weight: bold;"/>
+
+  <TextArea fx:id="txtOutput"
+            editable="false"
+            wrapText="true"
+            prefRowCount="4"
+            maxWidth="600"
+            style="-fx-font-family: monospace; -fx-font-size: 14px; -fx-control-inner-background: #eaf1f6; -fx-border-color: #c3d0db;"/>
+
+  <TabPane prefHeight="400" prefWidth="800"
+           style="-fx-font-size: 14px;">
+    <tabs>
+      <Tab text="Logs Iteración">
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+          <TextArea fx:id="txtLog"
+                    editable="false"
+                    wrapText="true"
+                    style="-fx-font-family: monospace; -fx-font-size: 13px;"/>
+        </ScrollPane>
+      </Tab>
+      <Tab text="Gráficos">
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+          <VBox fx:id="chartContainer" spacing="10" alignment="CENTER"
+                style="-fx-background-color: white; -fx-padding: 10;">
+          </VBox>
+        </ScrollPane>
+      </Tab>
+    </tabs>
+  </TabPane>
+
+</VBox>
