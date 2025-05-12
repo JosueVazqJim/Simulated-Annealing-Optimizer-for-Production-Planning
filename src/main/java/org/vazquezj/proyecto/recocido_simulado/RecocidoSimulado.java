@@ -2,8 +2,6 @@ package org.vazquezj.proyecto.recocido_simulado;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +33,7 @@ public class RecocidoSimulado {
 		this.solucionActual = new ArrayList<>(solucionInicial);
 		this.mejorSolucion = new ArrayList<>(solucionInicial);
 		this.horizontePlanificacion = new double[]{
-				planOperaciones.stream().mapToDouble(Operacion::getC_k).min().orElse(0),
-				planOperaciones.stream().mapToDouble(Operacion::getF_k).max().orElse(0)
+				0, solucionActual.size()
 		};
 		this.temperaturaInicial = temperaturaInicial;
 		this.temperaturaFinal = temperaturaFinal;
@@ -49,6 +46,12 @@ public class RecocidoSimulado {
 	public List<Double> optimizar() {
 		double temperatura = temperaturaInicial;
 		int contadorIteracion = 0;
+
+		//primero se revisa si la solucion inicial es factible
+		if (!esFactible(solucionActual)) {
+			logger.accept("La solución inicial no es factible.");
+			return null;
+		}
 
 		while (temperatura > temperaturaFinal) {
 			for (int i = 0; i < iteracionesPorTemperatura; i++) {
@@ -109,46 +112,77 @@ public class RecocidoSimulado {
 			// Si hay más de dos intervalos NO consecutivos, la solución no es válida
 			if (intervalos.size() > 2) return false;
 			if (intervalos.size() == 2 && intervalos.get(1) - intervalos.get(0) > 1) return false;
-			if (intervalos.size() > 2) return false; // redundancia defensiva
 		}
 		return true;
 	}
 
 
 	public double calcularAutonomia(List<Double> solucion) {
-		double autonomia = 0;
-		for (int i = 0; i < solucion.size() - 1; i++) {
-			double wmin = 0;
-			double wmax = 0;
-			for (Operacion op : planOperaciones) {
-				// Casos 4 y 5 del artículo (contribuyen al margen)
-				if (op.getF_k() <= solucion.get(i)) continue; // Caso 5: la operación termina antes del intervalo actual
-				if (op.getC_k() >= solucion.get(i + 1)) continue; // Caso 4: la operación comienza en el siguiente intervalo o después
+			double autonomia = 0;
+			for (int i = 0; i < solucion.size() - 1; i++) {
+				double wmin = 0;
+				double wmax = 0;
 
-				// Intersección real de la tarea con el intervalo
-				double inicioIntervalo = solucion.get(i);
-				double finIntervalo = solucion.get(i + 1);
-				double inicioTarea = Math.max(op.getC_k(), inicioIntervalo);
-				double finTarea = Math.min(op.getF_k(), finIntervalo);
-				double duracionDisponible = Math.max(0, finTarea - inicioTarea);
+				for (Operacion op : planOperaciones) {
+					// Filtrado: solo casos 4 y 5
+					if (op.getF_k() <= solucion.get(i)) continue;
+					if (op.getC_k() >= solucion.get(i + 1)) continue;
+					if (op.getC_k() >= solucion.get(i) && op.getF_k() <= solucion.get(i + 1)) continue;
 
-				// Si hay intersección posible
-				if (duracionDisponible > 0) {
-					// Calcular wmax
-					wmax += Math.min(duracionDisponible, op.getD_k());
+					// Acumular correctamente
+					double wmax_k = Math.min(op.getD_k(),
+							Math.min(solucion.get(i + 1) - op.getC_k(),
+									op.getF_k() - solucion.get(i)));
 
-					// Calcular wmin
-					double sobraInicio = Math.max(0, inicioIntervalo - op.getC_k());
-					double sobraFin = Math.max(0, op.getF_k() - finIntervalo);
-					double cargaMinima = Math.max(0, op.getD_k() - sobraInicio - sobraFin);
+					double wmin_k = Math.max(0,
+							Math.max(solucion.get(i + 1) - op.getF_k() + op.getD_k(),
+									op.getC_k() + op.getD_k() - solucion.get(i)));
 
-					wmin += Math.min(cargaMinima, duracionDisponible);
+					wmax += wmax_k;
+					wmin += wmin_k;
 				}
+
+				double margen = wmax - wmin;
+				autonomia += margen;
 			}
-			autonomia += (wmax - wmin);
+			return autonomia;
 		}
-		return autonomia;
-	}
+
+//	public double calcularAutonomia(List<Double> solucion) {
+//		double autonomia = 0;
+//		for (int i = 0; i < solucion.size() - 1; i++) {
+//			double wmin = 0;
+//			double wmax = 0;
+//			for (Operacion op : planOperaciones) {
+//				// Casos 4 y 5 del artículo (contribuyen al margen)
+//				if (op.getF_k() <= solucion.get(i)) continue; // Caso 1: la operación termina antes del intervalo actual
+//				if (op.getC_k() >= solucion.get(i + 1)) continue; // Caso 2: la operación comienza en el siguiente intervalo o después
+//				if (op.getC_k() >= solucion.get(i) && op.getF_k() <= solucion.get(i + 1)) continue; // Caso 3: la operación comienza y termina dentro del intervalo actual
+//
+//				// Intersección real de la tarea con el intervalo
+//				double inicioIntervalo = solucion.get(i);
+//				double finIntervalo = solucion.get(i + 1);
+//				double inicioTarea = Math.max(op.getC_k(), inicioIntervalo);
+//				double finTarea = Math.min(op.getF_k(), finIntervalo);
+//				double duracionDisponible = Math.max(0, finTarea - inicioTarea);
+//
+//				// Si hay intersección posible
+//				if (duracionDisponible > 0) {
+//					// Calcular wmax
+//					wmax += Math.min(duracionDisponible, op.getD_k());
+//
+//					// Calcular wmin
+//					double sobraInicio = Math.max(0, inicioIntervalo - op.getC_k());
+//					double sobraFin = Math.max(0, op.getF_k() - finIntervalo);
+//					double cargaMinima = Math.max(0, op.getD_k() - sobraInicio - sobraFin);
+//
+//					wmin += Math.min(cargaMinima, duracionDisponible);
+//				}
+//			}
+//			autonomia += (wmax - wmin);
+//		}
+//		return autonomia;
+//	}
 
 	// Criterio de aceptación de Metropolis
 	private boolean debeAceptarSolucion(double margenActual, double margenVecino, double temperatura) {
