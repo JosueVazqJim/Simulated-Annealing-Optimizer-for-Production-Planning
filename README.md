@@ -86,11 +86,7 @@ Use the sample data:
 
 The algorithm maximizes the autonomy margin (W) between maximum and minimum workloads across production intervals, where:
 
-<div style="background-color: white; display: inline-block; padding: 5px;">
-    <img src="https://latex.codecogs.com/svg.image?\Large&space;W_{\text{min}}(T_i,T_{i&plus;1},k)=\max\{0,T_{i&plus;1}-F_k&plus;D_k,C_k&plus;D_k-T_i\}" alt="equation">
-</div>
-
-
+![equation](https://latex.codecogs.com/svg.image?\Large&space;W_{\text{min}}(T_i,T_{i&plus;1},k)=\max\{0,T_{i&plus;1}-F_k&plus;D_k,C_k&plus;D_k-T_i\})
 ![equation](https://latex.codecogs.com/svg.image?\Large&space;W_{\text{max}}(T_i,T_{i&plus;1},k)=\min\{D_k,T_{i&plus;1}-C_k,F_k-T_i\})
 
 The above expressions satisfy and include the maximization function of W:
