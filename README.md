@@ -86,9 +86,12 @@ Use the sample data:
 
 The algorithm maximizes the autonomy margin (W) between maximum and minimum workloads across production intervals, where:
 
-    W = Σ[W_max(Tᵢ,Tᵢ₊₁) - W_min(Tᵢ,Tᵢ₊₁)]
+<img src="https://latex.codecogs.com/svg.latex?\Large W_{\text{max}}(T_i, T_{i+1}, k) = \min\{D_k, T_{i+1} - C_k, F_k - T_i\}" />
+<img src="https://latex.codecogs.com/svg.latex?\Large W_{\text{min}}(T_i, T_{i+1}, k) = \max\{0, T_{i+1} - F_k + D_k, C_k + D_k - T_i\}" />
 
+The above expressions satisfy and include the maximization function of W:
 
+<img src="https://latex.codecogs.com/svg.latex?\Large \max W (E(\pi), \pi) = \sum_{k=1}^K \sum_{i=1}^{M-1} \left[ \min\{D_k, T_{i+1} - C_k, F_k - T_i\} - \max \{0, T_{i+1} - (F_k - D_k), C_k + D_k - T_i\} \right]" />
 Key constraints:
 
     Temporal adjacency property (no operation spans >2 intervals)
